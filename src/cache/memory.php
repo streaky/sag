@@ -13,9 +13,6 @@
    limitations under the License.
 */
 
-require_once('SagCache.php');
-require_once('SagException.php');
-
 /**
  * Stores cached items in PHP's memory as serialized JSON, which was
  * benchmarked as being faster than serliaze() and clone.

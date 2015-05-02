@@ -13,11 +13,6 @@
    limitations under the License.
 */
 
-require_once('SagException.php');
-require_once('SagCouchException.php');
-require_once('httpAdapters/SagNativeHTTPAdapter.php');
-require_once('httpAdapters/SagCURLHTTPAdapter.php');
-
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
  *

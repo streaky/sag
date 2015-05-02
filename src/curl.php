@@ -7,7 +7,6 @@
  * @version %VERSION%
  * @package HTTP
  */
-require_once('SagHTTPAdapter.php');
 
 class SagCURLHTTPAdapter extends SagHTTPAdapter {
   private $ch;

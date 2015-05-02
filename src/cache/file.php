@@ -13,9 +13,6 @@
    limitations under the License.
 */
 
-require_once('SagCache.php');
-require_once('SagException.php');
-
 /**
  * Cache to the local hard disk. Uses /tmp by default, but you can specify
  * another location.

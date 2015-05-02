@@ -13,8 +13,6 @@
    limitations under the License.
 */
 
-require_once("SagException.php");
-
 /**
  * All the caching systems that Sag can leverage must extend this. The cache
  * values should always be the object that Sag::procPacket() would return.
