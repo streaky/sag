@@ -6,3 +6,6 @@
 *.tar.gz.md5
 *.tar.gz.sha
 .project
+/vendor
+.idea/
+composer.lock
