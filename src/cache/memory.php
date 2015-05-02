@@ -21,64 +21,64 @@
  * PHP is not accurate at reporting memory allocation and it does not make
  * sense to increase latency to implement a broken feature.
  *
- * @package Cache 
+ * @package Cache
  * @version %VERSION%
  */
 class SagMemoryCache extends SagCache {
 
-  private $cache;
+	private $cache;
 
-  public function __construct() {
-    parent::__construct();
-    $this->cache = array();
-  }
+	public function __construct() {
+		parent::__construct();
+		$this->cache = array();
+	}
 
-  public function set($url, &$item) {
-    if(empty($url)) {
-      throw new SagException('You need to provide a URL to cache.');
-    }
+	public function set($url, &$item) {
+		if(empty($url)) {
+			throw new SagException('You need to provide a URL to cache.');
+		}
 
-    if(!parent::mayCache($item)) {
-      return false;
-    }
+		if(!parent::mayCache($item)) {
+			return false;
+		}
 
-    // If it already exists, then remove the old version but keep a copy
-    if(isset($this->cache[$url])) {
-      $oldCopy = json_decode($this->cache[$url]);
-      self::remove($url);
-    }
+		// If it already exists, then remove the old version but keep a copy
+		if(isset($this->cache[$url])) {
+			$oldCopy = json_decode($this->cache[$url]);
+			self::remove($url);
+		}
 
-    $this->cache[$url] = json_encode($item);
+		$this->cache[$url] = json_encode($item);
 
-    return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
-  }
+		return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
+	}
 
-  public function get($url) {
-    return (isset($this->cache[$url])) ? json_decode($this->cache[$url]) : null;
-  }
+	public function get($url) {
+		return (isset($this->cache[$url])) ? json_decode($this->cache[$url]) : null;
+	}
 
-  public function remove($url) {
-    unset($this->cache[$url]);
+	public function remove($url) {
+		unset($this->cache[$url]);
 
-    return true;
-  }
+		return true;
+	}
 
-  public function clear() {
-    unset($this->cache);
-    $this->cache = array();
+	public function clear() {
+		unset($this->cache);
+		$this->cache = array();
 
-    return true;
-  }
+		return true;
+	}
 
-  public function setSize($bytes) {
-    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
-  }
+	public function setSize($bytes) {
+		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+	}
 
-  public function getSize() {
-    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
-  }
+	public function getSize() {
+		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+	}
 
-  public function getUsage() {
-    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
-  }
+	public function getUsage() {
+		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+	}
 }

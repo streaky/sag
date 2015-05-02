@@ -23,124 +23,127 @@
  * Every operation goes to the disk, so this cache will not be ideal for high
  * I/O operations.
  *
- * @package Cache 
+ * @package Cache
  * @version %VERSION%
  */
 class SagFileCache extends SagCache {
-  private static $fileExt = ".sag";
 
-  private $fsLocation;
+	private static $fileExt = ".sag";
 
-  /**
-   * @param string $location The file system path to the directory that should
-   * be used to store the cache files. The local system's temp directory is
-   * used by default.
-   * @return SagFileCache
-   */
-  public function __construct($location) {
-    if(!is_dir($location)) {
-      throw new SagException("The provided cache location is not a directory.");
-    }
+	private $fsLocation;
 
-    if(!is_readable($location) || !is_writable($location)) {
-      throw new SagException("Insufficient privileges to the supplied cache directory.");
-    }
+	/**
+	 * @param string $location The file system path to the directory that should
+	 * be used to store the cache files. The local system's temp directory is
+	 * used by default.
+	 *
+	 * @return SagFileCache
+	 */
+	public function __construct($location) {
+		if(!is_dir($location)) {
+			throw new SagException("The provided cache location is not a directory.");
+		}
 
-    parent::__construct();
+		if(!is_readable($location) || !is_writable($location)) {
+			throw new SagException("Insufficient privileges to the supplied cache directory.");
+		}
 
-    $this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
+		parent::__construct();
 
-    /* 
-     * Just update - don't freak out if the size isn't right, as the user might
-     * update it to non-default, they might not do anything with the cache,
-     * they might clean it themselves, etc. give them time. We'll freak when we
-     * add.
-     */
-    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file) {
-      self::addToSize(filesize($file));
-    }
-  }   
+		$this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
 
-  /**
-   * Generates the full filename/path that would be used for a given URL's
-   * cache object.
-   *
-   * @param string $url The URL for the cached item.
-   * @return string
-   */
-  public function makeFilename($url) {
-    return "$this->fsLocation/".self::makeKey($url).self::$fileExt;
-  }
+		/*
+		  * Just update - don't freak out if the size isn't right, as the user might
+		  * update it to non-default, they might not do anything with the cache,
+		  * they might clean it themselves, etc. give them time. We'll freak when we
+		  * add.
+		  */
+		foreach(glob($this->fsLocation . "/*" . self::$fileExt) as $file) {
+			self::addToSize(filesize($file));
+		}
+	}
 
-  public function set($url, &$item) {
-    if(empty($url)) {
-      throw new SagException('You need to provide a URL to cache.');
-    }
+	/**
+	 * Generates the full filename/path that would be used for a given URL's
+	 * cache object.
+	 *
+	 * @param string $url The URL for the cached item.
+	 *
+	 * @return string
+	 */
+	public function makeFilename($url) {
+		return "$this->fsLocation/" . self::makeKey($url) . self::$fileExt;
+	}
 
-    if(!parent::mayCache($item)) {
-      return false;
-    }
+	public function set($url, &$item) {
+		if(empty($url)) {
+			throw new SagException('You need to provide a URL to cache.');
+		}
 
-    $serialized = json_encode($item);
-    $target = self::makeFilename($url);
+		if(!parent::mayCache($item)) {
+			return false;
+		}
 
-    // If it already exists, then remove the old version but keep a copy
-    if(is_file($target)) {
-      $oldCopy = self::get($url);
-      self::remove($url);
-    }
+		$serialized = json_encode($item);
+		$target = self::makeFilename($url);
 
-    $fh = fopen($target, "w"); //in case self::remove() didn't get it?
+		// If it already exists, then remove the old version but keep a copy
+		if(is_file($target)) {
+			$oldCopy = self::get($url);
+			self::remove($url);
+		}
 
-    fwrite($fh, $serialized, strlen($serialized)); //don't throw up if we fail - we're not mission critical
-    self::addToSize(filesize($target));
+		$fh = fopen($target, "w"); //in case self::remove() didn't get it?
 
-    fclose($fh);
+		fwrite($fh, $serialized, strlen($serialized)); //don't throw up if we fail - we're not mission critical
+		self::addToSize(filesize($target));
 
-    // Only return the $oldCopy if it exists
-    return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
-  }
+		fclose($fh);
 
-  public function get($url) {
-    $target = self::makeFilename($url);
+		// Only return the $oldCopy if it exists
+		return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
+	}
 
-    if(!is_file($target)) {
-      return null;
-    }
+	public function get($url) {
+		$target = self::makeFilename($url);
 
-    if(!is_readable($target)) {
-      throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
-    }
+		if(!is_file($target)) {
+			return null;
+		}
 
-    return json_decode(file_get_contents($target));
-  }
+		if(!is_readable($target)) {
+			throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
+		}
 
-  public function remove($url) {
-    $target = $this->makeFilename($url);
-    return self::removeFile($target);
-  }
+		return json_decode(file_get_contents($target));
+	}
 
-  public function clear() {
-    $part = false;
+	public function remove($url) {
+		$target = $this->makeFilename($url);
+		return self::removeFile($target);
+	}
 
-    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file) {
-      if(!self::removeFile($file)) {
-        $part = true;
-      }
-    } 
+	public function clear() {
+		$part = false;
 
-    return !$part;
-  }
+		foreach(glob($this->fsLocation . "/*" . self::$fileExt) as $file) {
+			if(!self::removeFile($file)) {
+				$part = true;
+			}
+		}
 
-  private function removeFile($path) {
-    $size = filesize($path);
+		return !$part;
+	}
 
-    if(!unlink($path)) {
-      return false;
-    }
+	private function removeFile($path) {
+		$size = filesize($path);
 
-    self::addToSize(-$size);
+		if(!unlink($path)) {
+			return false;
+		}
 
-    return true;
-  }
+		self::addToSize(-$size);
+
+		return true;
+	}
 }

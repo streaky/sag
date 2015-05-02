@@ -21,7 +21,8 @@
  * @package Core
  */
 class SagException extends Exception {
-  public function __construct($msg = "", $code = 0) {
-    parent::__construct("Sag Error: $msg", $code);
-  }
+
+	public function __construct($msg = "", $code = 0) {
+		parent::__construct("Sag Error: $msg", $code);
+	}
 }
