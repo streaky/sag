@@ -194,4 +194,3 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     return $adapter;
   }
 }
-?>

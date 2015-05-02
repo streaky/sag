@@ -25,6 +25,7 @@
  * @version %VERSION%
  */
 class SagMemoryCache extends SagCache {
+
   private $cache;
 
   public function __construct() {
@@ -80,5 +81,4 @@ class SagMemoryCache extends SagCache {
   public function getUsage() {
     throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
   }
-} 
-?>
+}

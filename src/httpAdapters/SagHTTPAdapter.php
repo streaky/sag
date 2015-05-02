@@ -238,4 +238,3 @@ abstract class SagHTTPAdapter {
     }
   }
 }
-?>
