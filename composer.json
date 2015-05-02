@@ -1,7 +1,7 @@
 {
-  "name": "sag/sag",
+  "name": "streaky/sag",
   "type": "library",
-  "description": "A simple but powerful PHP library for talking to CouchDB.",
+  "description": "https://github.com/streaky/sag/",
   "homepage": "http://www.saggingcouch.com/",
   "license": "Apache-2.0",
   "authors": [
@@ -9,18 +9,22 @@
       "name": "Sam Bisbee",
       "email": "sam@sbisbee.com",
       "homepage": "http://www.sbisbee.com/"
+    }, {
+      "name": "streaky",
+      "email": "streaky@mybrokenlogic.com",
+      "homepage": "https://github.com/streaky/sag/"
     }
   ],
   "require": {
-    "php": ">=5.2.0"
+    "php": ">=5.4.0",
+    "ext-curl": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"
   },
-  "suggest": {
-    "lib-curl": "*"
-  },
   "autoload": {
-    "classmap": ["src/"]
+    "psr-4": {
+      "streaky\\sag\\": "src/"
+    }
   }
 }
