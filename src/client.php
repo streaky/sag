@@ -13,13 +13,15 @@
    limitations under the License.
 */
 
+namespace streaky\sag;
+
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
  *
  * @version %VERSION%
  * @package Core
  */
-class Sag {
+class client {
 
 	/**
 	 * @var string Used by login() to use HTTP Basic Authentication.
@@ -32,20 +34,6 @@ class Sag {
 	 * @static
 	 */
 	public static $AUTH_COOKIE = "AUTH_COOKIE";
-
-	/**
-	 * @var string Used to identify SagNativeHTTPAdapter by setHTTPAdapter() and
-	 * company.
-	 * @static
-	 */
-	public static $HTTP_NATIVE_SOCKETS = 'HTTP_NATIVE_SOCKETS';
-
-	/**
-	 * @var string Used to identify SagCURLHTTPAdapter by setHTTPAdapter() and
-	 * company.
-	 * @static
-	 */
-	public static $HTTP_CURL = 'HTTP_CURL';
 
 	private $db;                          //Database name to hit.
 
@@ -63,15 +51,19 @@ class Sag {
 
 	private $authSession;                 //AuthSession cookie value from/for CouchDB
 
+	/**
+	 * @var cache
+	 */
 	private $cache;
 
 	private $staleDefault;                //Whether or not to use ?stale=ok on all design doc calls
 
 	private $globalCookies = array();
 
+	/**
+	 * @var curl
+	 */
 	private $httpAdapter;
-
-	private $httpAdapterType;
 
 	/**
 	 * @param string $host (OPTIONAL) The host's IP or address of the Couch we're
@@ -89,25 +81,11 @@ class Sag {
 	}
 
 	/**
-	 * Set which HTTP library you want to use for communicating with CouchDB.
+	 * Set up curl HTTP library
 	 *
-	 * @param string $type The type of adapter you want to use. Should be one of
-	 * the Sag::$HTTP_* variables.
-	 *
-	 * @return Sag Returns $this.
-	 *
-	 * @see Sag::$HTTP_NATIVE_SOCKETS
-	 * @see Sag::$HTTP_CURL
+	 * @return client Returns $this.
 	 */
-	public function setHTTPAdapter($type = null) {
-		if(!$type) {
-			$type = extension_loaded("curl") ? self::$HTTP_CURL : self::$HTTP_NATIVE_SOCKETS;
-		}
-
-		// nothing to be done
-		if($type === $this->httpAdapterType) {
-			return true;
-		}
+	private function setHTTPAdapter() {
 
 		// remember what was already set (ie., might have called decode() already)
 		$prevDecode = null;
@@ -117,19 +95,8 @@ class Sag {
 			$prevTimeouts = $this->httpAdapter->getTimeouts();
 		}
 
-		// the glue
-		switch($type) {
-			case self::$HTTP_NATIVE_SOCKETS:
-				$this->httpAdapter = new SagNativeHTTPAdapter($this->host, $this->port);
-				break;
-
-			case self::$HTTP_CURL:
-				$this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port);
-				break;
-
-			default:
-				throw SagException("Invalid Sag HTTP adapter specified: $type");
-		}
+		// no other choice.
+		$this->httpAdapter = new curl($this->host, $this->port);
 
 		// restore previous decode value, if any
 		if(is_bool($prevDecode)) {
@@ -141,19 +108,7 @@ class Sag {
 			$this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
 		}
 
-		$this->httpAdapterType = $type;
-
 		return $this;
-	}
-
-	/**
-	 * Returns the current HTTP adapter being used.
-	 *
-	 * @return string Will be equal to Sag::$HTTP_NATIVE_SOCKETS or
-	 * Sag::$HTTP_CURL.
-	 */
-	public function currentHTTPAdapter() {
-		return $this->httpAdapterType;
 	}
 
 	/**
@@ -178,13 +133,13 @@ class Sag {
 	 */
 	public function login($user, $pass, $type = null) {
 		if($type == null) {
-			$type = Sag::$AUTH_BASIC;
+			$type = self::$AUTH_BASIC;
 		}
 
 		$this->authType = $type;
 
 		switch($type) {
-			case Sag::$AUTH_BASIC:
+			case self::$AUTH_BASIC:
 				//these will end up in a header, so don't URL encode them
 				$this->user = $user;
 				$this->pass = $pass;
@@ -192,7 +147,7 @@ class Sag {
 				return true;
 				break;
 
-			case Sag::$AUTH_COOKIE:
+			case self::$AUTH_COOKIE:
 				$user = urlencode($user);
 				$pass = urlencode($pass);
 
@@ -206,7 +161,7 @@ class Sag {
 		}
 
 		//should never reach this line
-		throw new SagException("Unknown auth type for login().");
+		throw new exception\sag("Unknown auth type for login().");
 	}
 
 	/**
@@ -228,7 +183,7 @@ class Sag {
 	 */
 	public function decode($decode) {
 		if(!is_bool($decode)) {
-			throw new SagException('decode() expected a boolean');
+			throw new exception\sag('decode() expected a boolean');
 		}
 
 		$this->httpAdapter->decodeResp = $decode;
@@ -249,7 +204,7 @@ class Sag {
 	 */
 	public function get($url) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		//The first char of the URL should be a slash.
@@ -312,7 +267,7 @@ class Sag {
 	 */
 	public function head($url) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		//The first char of the URL should be a slash.
@@ -338,11 +293,11 @@ class Sag {
 	 */
 	public function delete($id, $rev) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		if(!is_string($id) || !is_string($rev) || empty($id) || empty($rev)) {
-			throw new SagException('delete() expects two strings.');
+			throw new exception\sag('delete() expects two strings.');
 		}
 
 		$url = "/{$this->db}/$id";
@@ -365,15 +320,15 @@ class Sag {
 	 */
 	public function put($id, $data) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		if(!is_string($id)) {
-			throw new SagException('put() expected a string for the doc id.');
+			throw new exception\sag('put() expected a string for the doc id.');
 		}
 
 		if(!isset($data) || (!is_object($data) && !is_string($data) && !is_array($data))) {
-			throw new SagException('put() needs an object for data - are you trying to use delete()?');
+			throw new exception\sag('put() needs an object for data - are you trying to use delete()?');
 		}
 
 		$toSend = (is_string($data)) ? $data : json_encode($data);
@@ -422,11 +377,11 @@ class Sag {
 	 */
 	public function post($data, $path = null) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		if(!isset($data) || (!is_string($data) && !is_object($data) && !is_array($data))) {
-			throw new SagException('post() needs an object for data.');
+			throw new exception\sag('post() needs an object for data.');
 		}
 
 		if(!is_string($data)) {
@@ -436,7 +391,7 @@ class Sag {
 		if(is_string($path) && !empty($path)) {
 			$path = ((substr($path, 0, 1) != '/') ? '/' : '') . $path;
 		} else if(isset($path)) {
-			throw new SagException('post() needs a string for a path.');
+			throw new exception\sag('post() needs a string for a path.');
 		}
 
 		return $this->procPacket('POST', "/{$this->db}{$path}", $data);
@@ -457,18 +412,18 @@ class Sag {
 	 */
 	public function bulk($docs, $allOrNothing = false) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		if(!is_array($docs)) {
-			throw new SagException('bulk() expects an array for its first argument');
+			throw new exception\sag('bulk() expects an array for its first argument');
 		}
 
 		if(!is_bool($allOrNothing)) {
-			throw new SagException('bulk() expects a boolean for its second argument');
+			throw new exception\sag('bulk() expects a boolean for its second argument');
 		}
 
-		$data = new stdClass();
+		$data = new \stdClass();
 
 		//Only send all_or_nothing if it's non-default (true), saving bandwidth.
 		if($allOrNothing) {
@@ -495,19 +450,19 @@ class Sag {
 	 */
 	public function copy($srcID, $dstID, $dstRev = null) {
 		if(!$this->db) {
-			throw new SagException('No database specified');
+			throw new exception\sag('No database specified');
 		}
 
 		if(empty($srcID) || !is_string($srcID)) {
-			throw new SagException('copy() got an invalid source ID');
+			throw new exception\sag('copy() got an invalid source ID');
 		}
 
 		if(empty($dstID) || !is_string($dstID)) {
-			throw new SagException('copy() got an invalid destination ID');
+			throw new exception\sag('copy() got an invalid destination ID');
 		}
 
 		if($dstRev != null && (empty($dstRev) || !is_string($dstRev))) {
-			throw new SagException('copy() got an invalid source revision');
+			throw new exception\sag('copy() got an invalid source revision');
 		}
 
 		$headers = array("Destination" => "$dstID" . (($dstRev) ? "?rev=$dstRev" : ""));
@@ -537,7 +492,7 @@ class Sag {
 	public function setDatabase($db, $createIfNotFound = false) {
 		if($this->db != $db || $createIfNotFound) {
 			if(!is_string($db)) {
-				throw new SagException('setDatabase() expected a string.');
+				throw new exception\sag('setDatabase() expected a string.');
 			}
 
 			$db = urlencode($db);
@@ -545,7 +500,7 @@ class Sag {
 			if($createIfNotFound) {
 				try {
 					self::procPacket('HEAD', "/{$db}");
-				} catch(SagCouchException $e) {
+				} catch(exception\couch $e) {
 					if($e->getCode() != 404) {
 						throw $e; //these are not the errors that we are looking for
 					}
@@ -582,14 +537,14 @@ class Sag {
 	 */
 	public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null, $descending = false, $skip = 0) {
 		if(!$this->db) {
-			throw new SagException('No database specified.');
+			throw new exception\sag('No database specified.');
 		}
 
 		$qry = array();
 
 		if($incDocs !== false) {
 			if(!is_bool($incDocs)) {
-				throw new SagException('getAllDocs() expected a boolean for include_docs.');
+				throw new exception\sag('getAllDocs() expected a boolean for include_docs.');
 			}
 
 			$qry[] = "include_docs=true";
@@ -597,7 +552,7 @@ class Sag {
 
 		if(isset($startKey)) {
 			if(!is_string($startKey)) {
-				throw new SagException('getAllDocs() expected a string for startkey.');
+				throw new exception\sag('getAllDocs() expected a string for startkey.');
 			}
 
 			$qry[] = 'startkey=' . urlencode($startKey);
@@ -605,7 +560,7 @@ class Sag {
 
 		if(isset($endKey)) {
 			if(!is_string($endKey)) {
-				throw new SagException('getAllDocs() expected a string for endkey.');
+				throw new exception\sag('getAllDocs() expected a string for endkey.');
 			}
 
 			$qry[] = 'endkey=' . $endKey;
@@ -613,7 +568,7 @@ class Sag {
 
 		if(isset($limit)) {
 			if(!is_int($limit) || $limit < 0) {
-				throw new SagException('getAllDocs() expected a positive integeter for limit.');
+				throw new exception\sag('getAllDocs() expected a positive integeter for limit.');
 			}
 
 			$qry[] = 'limit=' . urlencode($limit);
@@ -621,7 +576,7 @@ class Sag {
 
 		if($descending !== false) {
 			if(!is_bool($descending)) {
-				throw new SagException('getAllDocs() expected a boolean for descending.');
+				throw new exception\sag('getAllDocs() expected a boolean for descending.');
 			}
 
 			$qry[] = "descending=true";
@@ -629,7 +584,7 @@ class Sag {
 
 		if(isset($skip)) {
 			if(!is_int($skip) || $skip < 0) {
-				throw new SagException('getAllDocs() expected a non-negative integer for skip');
+				throw new exception\sag('getAllDocs() expected a non-negative integer for skip');
 			}
 
 			$qry[] = 'skip=' . urlencode($skip);
@@ -639,10 +594,10 @@ class Sag {
 
 		if(isset($keys)) {
 			if(!is_array($keys)) {
-				throw new SagException('getAllDocs() expected an array for the keys.');
+				throw new exception\sag('getAllDocs() expected an array for the keys.');
 			}
 
-			$data = new stdClass();
+			$data = new \stdClass();
 			$data->keys = $keys;
 
 			return $this->procPacket('POST', "/{$this->db}/_all_docs$qry", json_encode($data));
@@ -669,7 +624,7 @@ class Sag {
 	 */
 	public function generateIDs($num = 10) {
 		if(!is_int($num) || $num < 0) {
-			throw new SagException('generateIDs() expected an integer >= 0.');
+			throw new exception\sag('generateIDs() expected an integer >= 0.');
 		}
 
 		//don't need to URL encode since ints are, well, harmless lil' ol' ints
@@ -685,7 +640,7 @@ class Sag {
 	 */
 	public function createDatabase($name) {
 		if(empty($name) || !is_string($name)) {
-			throw new SagException('createDatabase() expected a valid database name');
+			throw new exception\sag('createDatabase() expected a valid database name');
 		}
 
 		return $this->procPacket('PUT', "/$name");
@@ -700,7 +655,7 @@ class Sag {
 	 */
 	public function deleteDatabase($name) {
 		if(empty($name) || !is_string($name)) {
-			throw new SagException('deleteDatabase() expected a valid database name');
+			throw new exception\sag('deleteDatabase() expected a valid database name');
 		}
 
 		return $this->procPacket('DELETE', "/$name");
@@ -726,32 +681,32 @@ class Sag {
 	 */
 	public function replicate($src, $target, $continuous = false, $createTarget = null, $filter = null, $filterQueryParams = null) {
 		if(empty($src) || !is_string($src)) {
-			throw new SagException('replicate() is missing a source to replicate from.');
+			throw new exception\sag('replicate() is missing a source to replicate from.');
 		}
 
 		if(empty($target) || !is_string($target)) {
-			throw new SagException('replicate() is missing a target to replicate to.');
+			throw new exception\sag('replicate() is missing a target to replicate to.');
 		}
 
 		if(!is_bool($continuous)) {
-			throw new SagException('replicate() expected a boolean for its third argument.');
+			throw new exception\sag('replicate() expected a boolean for its third argument.');
 		}
 
 		if(isset($createTarget) && !is_bool($createTarget)) {
-			throw new SagException('createTarget needs to be a boolean.');
+			throw new exception\sag('createTarget needs to be a boolean.');
 		}
 
 		if(isset($filter)) {
 			if(!is_string($filter)) {
-				throw new SagException('filter must be the name of a design doc\'s filter function: ddoc/filter');
+				throw new exception\sag('filter must be the name of a design doc\'s filter function: ddoc/filter');
 			}
 
 			if(isset($filterQueryParams) && !is_object($filterQueryParams) && !is_array($filterQueryParams)) {
-				throw new SagException('filterQueryParams needs to be an object or an array');
+				throw new exception\sag('filterQueryParams needs to be an object or an array');
 			}
 		}
 
-		$data = new stdClass();
+		$data = new \stdClass();
 		$data->source = $src;
 		$data->target = $target;
 
@@ -808,23 +763,23 @@ class Sag {
 	 */
 	public function setAttachment($name, $data, $contentType, $docID, $rev = null) {
 		if(empty($docID)) {
-			throw new SagException('You need to provide a document ID.');
+			throw new exception\sag('You need to provide a document ID.');
 		}
 
 		if(empty($name)) {
-			throw new SagException('You need to provide the attachment\'s name.');
+			throw new exception\sag('You need to provide the attachment\'s name.');
 		}
 
 		if(empty($data)) {
-			throw new SagException('You need to provide the attachment\'s data.');
+			throw new exception\sag('You need to provide the attachment\'s data.');
 		}
 
 		if(!is_string($data)) {
-			throw new SagException('You need to provide the attachment\'s data as a string.');
+			throw new exception\sag('You need to provide the attachment\'s data as a string.');
 		}
 
 		if(empty($contentType)) {
-			throw new SagException('You need to provide the data\'s Content-Type.');
+			throw new exception\sag('You need to provide the data\'s Content-Type.');
 		}
 
 		return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}" . (($rev) ? "?rev=" . urlencode($rev) : ""), $data, array("Content-Type" => $contentType));
@@ -869,13 +824,8 @@ class Sag {
 		* @param SagCache An implementation of SagCache (ex., SagFileCache).
 		* @return Sag Returns $this.
 		*/
-	public function setCache(&$cacheImpl) {
-		if(!($cacheImpl instanceof SagCache)) {
-			throw new SagException('That is not a valid cache.');
-		}
-
+	public function setCache(cache &$cacheImpl) {
 		$this->cache = $cacheImpl;
-
 		return $this;
 	}
 
@@ -922,7 +872,7 @@ class Sag {
 	 */
 	public function setStaleDefault($stale) {
 		if(!is_bool($stale)) {
-			throw new SagException('setStaleDefault() expected a boolean argument.');
+			throw new exception\sag('setStaleDefault() expected a boolean argument.');
 		}
 
 		$this->staleDefault = $stale;
@@ -947,11 +897,11 @@ class Sag {
 	 */
 	public function setCookie($key, $value) {
 		if(!$key || !is_string($key)) {
-			throw new SagException('Unexpected cookie key.');
+			throw new exception\sag('Unexpected cookie key.');
 		}
 
 		if($value && !is_string($value)) {
-			throw new SagException('Unexpected cookie value.');
+			throw new exception\sag('Unexpected cookie value.');
 		}
 
 		if($value) {
@@ -988,7 +938,7 @@ class Sag {
 	 */
 	public function useSSL($use) {
 		if(!is_bool($use)) {
-			throw new SagException('Excepted a boolean, but got something else.');
+			throw new exception\sag('Excepted a boolean, but got something else.');
 		}
 
 		if($use !== $this->usingSSL()) {
@@ -1024,15 +974,15 @@ class Sag {
 	public function setSSLCert($path) {
 		if($path !== null) {
 			if(!is_string($path) || !$path) {
-				throw new SagException('Invalid file path provided.');
+				throw new exception\sag('Invalid file path provided.');
 			}
 
 			if(!is_file($path)) {
-				throw new SagException('That path does not point to a file.');
+				throw new exception\sag('That path does not point to a file.');
 			}
 
 			if(!is_readable($path)) {
-				throw new SagException('PHP does not have read privileges with that file.');
+				throw new exception\sag('PHP does not have read privileges with that file.');
 			}
 		}
 
@@ -1043,7 +993,7 @@ class Sag {
 
 	public function setPathPrefix($path) {
 		if(!is_string($path)) {
-			throw new SagException('Invalid URL path prefix - must be a string.');
+			throw new exception\sag('Invalid URL path prefix - must be a string.');
 		}
 
 		$this->pathPrefix = $path;
@@ -1062,7 +1012,7 @@ class Sag {
 		  * permitted later.
 		  */
 		if($data && !is_string($data)) {
-			throw new SagException('Unexpected data format. Please report this bug.');
+			throw new exception\sag('Unexpected data format. Please report this bug.');
 		}
 
 		if($this->pathPrefix && is_string($this->pathPrefix)) {
@@ -1080,7 +1030,7 @@ class Sag {
 		}
 
 		if(strtolower($headers['Expect']) === '100-continue') {
-			throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
+			throw new exception\sag('Sag does not support HTTP/1.1\'s Continue.');
 		}
 
 		// Do some string replacing for HTTP sanity.
@@ -1098,9 +1048,9 @@ class Sag {
 		$headers['Accept'] = 'application/json';
 
 		//usernames and passwords can be blank
-		if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass))) {
+		if($this->authType == self::$AUTH_BASIC && (isset($this->user) || isset($this->pass))) {
 			$headers["Authorization"] = 'Basic ' . base64_encode("{$this->user}:{$this->pass}");
-		} elseif($this->authType == Sag::$AUTH_COOKIE && isset($this->authSession)) {
+		} elseif($this->authType == self::$AUTH_COOKIE && isset($this->authSession)) {
 			$headers['Cookie'] = array('AuthSession' => $this->authSession);
 			$headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
 		}

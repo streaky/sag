@@ -13,6 +13,8 @@
    limitations under the License.
 */
 
+namespace streaky\sag;
+
 /**
  * All the caching systems that Sag can leverage must extend this. The cache
  * values should always be the object that Sag::procPacket() would return.
@@ -25,7 +27,7 @@
  * @package Cache
  * @version %VERSION%
  */
-abstract class SagCache {
+abstract class cache {
 
 	private $maxSize;                                     //in bytes
 
@@ -59,7 +61,7 @@ abstract class SagCache {
 	 * Returns the previously cached item if there was one and we were able to
 	 * add the new item to the cache.
 	 *
-	 * Sag will refuse to cache the object by throwing a SagException if adding
+	 * Sag will refuse to cache the object by throwing a exception\sag if adding
 	 * the file to the cache would exceed 95% of the disk or partition's free
 	 * space.
 	 *
@@ -136,7 +138,7 @@ abstract class SagCache {
 
 	protected function addToSize($amt) {
 		if(!is_int($amt) && !is_float($amt)) {
-			throw new SagException('Invalid cache size modifier.');
+			throw new exception\sag('Invalid cache size modifier.');
 		}
 
 		$this->currentSize += $amt;

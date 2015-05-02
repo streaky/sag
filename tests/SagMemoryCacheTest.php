@@ -112,7 +112,7 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
       $this->cache->getUsage();
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
   }

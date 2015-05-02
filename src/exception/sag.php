@@ -13,6 +13,8 @@
    limitations under the License.
 */
 
+namespace streaky\sag\exception;
+
 /**
  * This exception is thrown when Sag has an internal error, such as an invalid
  * type being passed to a function.
@@ -20,9 +22,4 @@
  * @version %VERSION%
  * @package Core
  */
-class SagException extends Exception {
-
-	public function __construct($msg = "", $code = 0) {
-		parent::__construct("Sag Error: $msg", $code);
-	}
-}
+class sag extends \Exception {}

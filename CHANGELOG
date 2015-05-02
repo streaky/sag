@@ -113,7 +113,7 @@ New Features
     introduces setSSL() to turn SSL on/off, and setSSLCert() to specify a
     certificate file to verify against. Verification is only supported if you
     provide a certificate with setSSLCert(). HTTP libraries that do not support
-    SSL (ie., native sockets) will throw a SagException if you call an SSL
+    SSL (ie., native sockets) will throw a exception\sag if you call an SSL
     function.
 
   * You can now tell getAllDocs() to sort in descending order. Thanks to cygal
@@ -183,8 +183,8 @@ Fixed Bugs
     Dale Harvey in #couchdb for helping on this. (closes #23)
 
   * Previously an HTTP response code >=400 to a HEAD request would not throw a
-    SagCouchException because there was no error property in the message body
-    (because HEAD responses do not have bodies). Now a SagCouchException is
+    exception\couch because there was no error property in the message body
+    (because HEAD responses do not have bodies). Now a exception\couch is
     thrown as expected with the exception's code set to the HTTP response code.
     This also creates a slight performance boost for parsing HEAD requests.
 

@@ -13,6 +13,10 @@
    limitations under the License.
 */
 
+namespace streaky\sag\cache;
+
+use \streaky\sag\exception;
+
 /**
  * Stores cached items in PHP's memory as serialized JSON, which was
  * benchmarked as being faster than serliaze() and clone.
@@ -24,7 +28,7 @@
  * @package Cache
  * @version %VERSION%
  */
-class SagMemoryCache extends SagCache {
+class memory extends \streaky\sag\cache {
 
 	private $cache;
 
@@ -35,7 +39,7 @@ class SagMemoryCache extends SagCache {
 
 	public function set($url, &$item) {
 		if(empty($url)) {
-			throw new SagException('You need to provide a URL to cache.');
+			throw new exception\cache('You need to provide a URL to cache.');
 		}
 
 		if(!parent::mayCache($item)) {
@@ -71,14 +75,14 @@ class SagMemoryCache extends SagCache {
 	}
 
 	public function setSize($bytes) {
-		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+		throw new exception\cache('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
 	}
 
 	public function getSize() {
-		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+		throw new exception\cache('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
 	}
 
 	public function getUsage() {
-		throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+		throw new exception\cache('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
 	}
 }

@@ -13,6 +13,8 @@
    limitations under the License.
 */
 
+namespace streaky\sag\exception;
+
 /**
  * This exception is thrown when CouchDB reports an error, such as sending
  * malformed JSON, and not Sag.
@@ -24,9 +26,4 @@
  * @version %VERSION%
  * @package Core
  */
-class SagCouchException extends Exception {
-
-	public function __construct($msg = "", $code = 0) {
-		parent::__construct("CouchDB Error: $msg", $code);
-	}
-}
+class couch extends \Exception {}

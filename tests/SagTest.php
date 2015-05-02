@@ -170,7 +170,7 @@ class SagTest extends PHPUnit_Framework_TestCase
         $this->couch->post($validData, $v);
         $this->assertTrue(false); //above should throw
       }
-      catch(SagException $e)
+      catch(exception\sag $e)
       {
         $this->assertTrue(true);
       }
@@ -274,7 +274,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass(), "'");
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
 
@@ -307,7 +307,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $doc = $this->couch->get('/1');
       $this->assertTrue(false); //previous line should have thrown an exception
     }
-    catch(SagCouchException $e)
+    catch(exception\couch $e)
     {
       //make sure that we're setting codes correctly and catching the right exception
       $this->assertEquals($e->getCode(), '404');
@@ -325,20 +325,20 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->couch->generateIDs(-1); //should throw a SagException
+      $this->couch->generateIDs(-1); //should throw a exception\sag
       $this->assertTrue(false);
     }
-    catch(SagException $e)
+    catch(exception\sag $e)
     {
       $this->assertTrue(true);
     }
 
     try
     {
-      $this->couch->get('/_all_docs?key=badJSON'); //should throw a SagCouchException
+      $this->couch->get('/_all_docs?key=badJSON'); //should throw a exception\couch
       $this->assertTrue(false);
     }
-    catch(SagCouchException $e)
+    catch(exception\couch $e)
     {
       $this->assertTrue(true);
     }
@@ -396,7 +396,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true, "test")->body->ok);
       $this->assertFalse(true); //should not get this far
     }
-    catch(SagCouchException $e)
+    catch(exception\couch $e)
     {
       $this->assertTrue(true); //we want this to happen
     }
@@ -406,7 +406,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertFalse($this->couch->replicate($this->couchDBName, $newDB, false, false, 123)->body->ok);
       $this->assertFalse(true); //should not get this far
     }
-    catch(SagException $e)
+    catch(exception\sag $e)
     {
       $this->assertTrue(true); //we want this to happen
     }
@@ -418,7 +418,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true, "test", 123)->body->ok);
       $this->assertFalse(true); //should not get this far
     }
-    catch(SagException $e)
+    catch(exception\sag $e)
     {
       $this->assertTrue(true); //we want this to happen
     }
@@ -555,7 +555,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->setCache(new stdClass());
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
   }
@@ -722,7 +722,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->login('a', 'b', "aasdfsadfasf");
       $this->assertTrue(false);
     }
-    catch(SagException $e)
+    catch(exception\sag $e)
     {
       //We want this exception
       $this->assertTrue(true);
@@ -791,7 +791,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertEquals($this->couch, $this->couch->useSSL(false));
       $this->assertEquals($this->couch, $this->couch->setSSLCert(__FILE__));
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       //do nothing - not all http libraries support ssl
     }
   }
@@ -808,7 +808,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->setCookie(false, 'bar');
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
 
@@ -817,7 +817,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->setCookie('foo', true);
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
   }
@@ -827,7 +827,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->useSSL('');
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
 
@@ -835,12 +835,12 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     /*
      * Checks normal behavior, but also makes sure that adapters/libraries that
-     * do not support SSL throw a SagException.
+     * do not support SSL throw a exception\sag.
      */
     try {
       $this->assertEquals($this->couch, $this->couch->useSSL(true));
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
         $this->assertTrue(true);
 
@@ -871,7 +871,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->setSSLCert(false);
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
 
@@ -885,7 +885,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->setSSLCert($file);
       $this->assertTrue(false);
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
 
@@ -905,7 +905,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $badCouch->get('/asdf');
       $this->assertTrue(false); //shouldn't reach this line
     }
-    catch(SagException $e) {
+    catch(exception\sag $e) {
       $this->assertTrue(true);
     }
   }

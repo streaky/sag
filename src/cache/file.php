@@ -13,6 +13,11 @@
    limitations under the License.
 */
 
+
+namespace streaky\sag\exception;
+
+use \streaky\sag\exception;
+
 /**
  * Cache to the local hard disk. Uses /tmp by default, but you can specify
  * another location.
@@ -26,7 +31,7 @@
  * @package Cache
  * @version %VERSION%
  */
-class SagFileCache extends SagCache {
+class file extends \streaky\sag\cache {
 
 	private static $fileExt = ".sag";
 
@@ -37,15 +42,15 @@ class SagFileCache extends SagCache {
 	 * be used to store the cache files. The local system's temp directory is
 	 * used by default.
 	 *
-	 * @return SagFileCache
+	 * @return file
 	 */
 	public function __construct($location) {
 		if(!is_dir($location)) {
-			throw new SagException("The provided cache location is not a directory.");
+			throw new exception\cache("The provided cache location is not a directory.");
 		}
 
 		if(!is_readable($location) || !is_writable($location)) {
-			throw new SagException("Insufficient privileges to the supplied cache directory.");
+			throw new exception\cache("Insufficient privileges to the supplied cache directory.");
 		}
 
 		parent::__construct();
@@ -77,7 +82,7 @@ class SagFileCache extends SagCache {
 
 	public function set($url, &$item) {
 		if(empty($url)) {
-			throw new SagException('You need to provide a URL to cache.');
+			throw new exception\cache('You need to provide a URL to cache.');
 		}
 
 		if(!parent::mayCache($item)) {
@@ -112,7 +117,7 @@ class SagFileCache extends SagCache {
 		}
 
 		if(!is_readable($target)) {
-			throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
+			throw new exception\cache("Could not read the cache file, please check its permissions.");
 		}
 
 		return json_decode(file_get_contents($target));

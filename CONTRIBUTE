@@ -92,7 +92,7 @@ What not to do:
       //...
     }
     else {
-      throw SagException('Unexpected value for $foo.');
+      throw exception\sag('Unexpected value for $foo.');
     }
 
 What you should do:
@@ -107,5 +107,5 @@ What you should do:
         break;
 
       default:
-        throw SagException('Unexpected value for $foo.');
+        throw exception\sag('Unexpected value for $foo.');
     }

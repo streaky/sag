@@ -34,7 +34,7 @@ class SagUserUtils {
    */
   public function __construct($sag) {
     if(!($sag instanceof Sag)) {
-      throw new SagException('Tried to call setSag() with a non-Sag implementation.');
+      throw new exception\sag('Tried to call setSag() with a non-Sag implementation.');
     }
 
     //Use the database if they pre-selected it, else default to Couch's default.
@@ -68,28 +68,28 @@ class SagUserUtils {
    */
   public function createUser($id, $password, $name = null, $roles = array()) {
     if(!is_string($id) || empty($id)) {
-      throw new SagException('Invalid user id.');
+      throw new exception\sag('Invalid user id.');
     }
 
     if(!is_string($password) || empty($password)) {
-      throw new SagException('Invalid user password.');
+      throw new exception\sag('Invalid user password.');
     }
 
     if($name && (!is_string($name) || empty($name))) {
-      throw new SagException('Invalid user name.');
+      throw new exception\sag('Invalid user name.');
     }
 
     if(!is_array($roles)) {
-      throw new SagException('Invalid list of roles: it must be an array.');
+      throw new exception\sag('Invalid list of roles: it must be an array.');
     }
     else {
       foreach($roles as $k => $v) {
         if(!is_int($k)) {
-          throw new SagException('The roles array cannot be an associative array.');
+          throw new exception\sag('The roles array cannot be an associative array.');
         }
 
         if(!is_string($v) || empty($v)) {
-          throw new SagException("An invalid role was specified at array position $k");
+          throw new exception\sag("An invalid role was specified at array position $k");
         }
       }
     }
@@ -148,15 +148,15 @@ class SagUserUtils {
    */
   public function changePassword($doc, $newPassword, $upload = false) {
     if(empty($doc->_id)) {
-      throw new SagException('This does not look like a document: there is no _id.');
+      throw new exception\sag('This does not look like a document: there is no _id.');
     }
 
     if(empty($doc->salt) || empty($doc->password_sha)) {
-      throw new SagException('This does not look like a user or it is an admin. Change admin passwords via the server config.');
+      throw new exception\sag('This does not look like a user or it is an admin. Change admin passwords via the server config.');
     }
 
     if(empty($newPassword)) {
-      throw new SagException('Empty password are not allowed.');
+      throw new exception\sag('Empty password are not allowed.');
     }
 
     $doc->password_sha = sha1($newPassword + self::makeSalt());
