@@ -6,13 +6,14 @@
   "license": "Apache-2.0",
   "authors": [
     {
-      "name": "Sam Bisbee",
-      "email": "sam@sbisbee.com",
-      "homepage": "http://www.sbisbee.com/"
-    }, {
-      "name": "streaky",
+      "name": "Streaky (This Fork)",
       "email": "streaky@mybrokenlogic.com",
       "homepage": "https://github.com/streaky/sag/"
+    },
+    {
+      "name": "Sam Bisbee (Original Sag Author)",
+      "email": "sam@sbisbee.com",
+      "homepage": "http://www.sbisbee.com/"
     }
   ],
   "require": {
