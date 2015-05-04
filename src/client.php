@@ -145,7 +145,7 @@ class client {
 				$this->pass = $pass;
 
 				return true;
-				break;
+			break;
 
 			case self::$AUTH_COOKIE:
 				$user = urlencode($user);
@@ -157,11 +157,11 @@ class client {
 
 				return $this->authSession;
 
-				break;
+			break;
 		}
 
 		//should never reach this line
-		throw new exception\sag("Unknown auth type for login().");
+		throw new exception\sag("Unknown auth type");
 	}
 
 	/**
@@ -209,10 +209,10 @@ class client {
 
 		//The first char of the URL should be a slash.
 		if(strpos($url, '/') !== 0) {
-			$url = "/$url";
+			$url = "/{$url}";
 		}
 
-		$url = "/{$this->db}$url";
+		$url = "/{$this->db}{$url}";
 
 		if($this->staleDefault) {
 			$url = self::setURLParameter($url, 'stale', 'ok');
@@ -790,7 +790,7 @@ class client {
 	 *
 	 * @param int $seconds
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 */
 	public function setOpenTimeout($seconds) {
 		//the adapter will take care of the validation for us
@@ -832,7 +832,7 @@ class client {
 	/**
 	 * Returns the cache object that's currently being used.
 	 *
-	 * @return SagCache
+	 * @return cache
 	 */
 	public function getCache() {
 		return $this->cache;
@@ -851,7 +851,7 @@ class client {
 	/**
 	 * Retrieves the run time metrics from CouchDB that lives at /_stats.
 	 *
-	 * @return stdClass
+	 * @return \stdClass
 	 */
 	public function getStats() {
 		return $this->procPacket('GET', '/_stats');
@@ -868,7 +868,7 @@ class client {
 	 *
 	 * @param bool $stale True will make stale=ok be sent by default.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 */
 	public function setStaleDefault($stale) {
 		if(!is_bool($stale)) {
@@ -891,7 +891,7 @@ class client {
 	 * @param string $key The cookie's key.
 	 * @param string $value The cookie's value.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 *
 	 * @see getCookie()
 	 */
@@ -932,7 +932,7 @@ class client {
 	 *
 	 * @param bool $use Set to true to use SSL, false to not.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 *
 	 * @see setSSLCert()
 	 */
@@ -967,7 +967,7 @@ class client {
 	 * @param string $path File path to the certificate file. Pass null to unset
 	 * the path.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 *
 	 * @see useSSL()
 	 */
