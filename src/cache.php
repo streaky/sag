@@ -99,7 +99,7 @@ abstract class cache {
 	 */
 	public function setSize($bytes) {
 		if(!is_int($bytes) || $bytes <= 0) {
-			throw new Exception("The cache size must be a positive integer (bytes).");
+			throw new exception\cache("The cache size must be a positive integer (bytes).");
 		}
 
 		$this->maxSize = $bytes;
