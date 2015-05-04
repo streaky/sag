@@ -85,7 +85,8 @@ class curl {
 
 			if(isset($json)) {
 				if(!empty($json->error)) {
-					throw new exception\couch("{$json->error} ({$json->reason})", $response->headers->_HTTP->status);
+					$json->error = ucfirst($json->error);
+					throw new exception\couch("{$json->error} (".trim($json->reason, "\t\n\r\0\x0B.").")", $response->headers->_HTTP->status);
 				}
 
 				if($this->decodeResp) {
@@ -330,7 +331,14 @@ class curl {
 				}
 			}
 		} else if(curl_errno($this->ch)) {
-			throw new exception\sag('cURL error #' . curl_errno($this->ch) . ': ' . curl_error($this->ch));
+			switch(curl_errno($this->ch)) {
+				case 7:
+					throw new exception\sag('cURL Error: Connection Refused', curl_errno($this->ch));
+				break;
+				default :
+					throw new exception\sag('cURL error #' . curl_errno($this->ch) . ': ' . curl_error($this->ch));
+			}
+
 		} else {
 			throw new exception\sag('cURL returned false without providing an error.');
 		}
