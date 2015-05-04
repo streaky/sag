@@ -75,7 +75,7 @@ class clientTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * We haven't authed yet, if we can create a db here something is wrong
+	 * Fetch a doc that shouldn't exist yet
 	 *
 	 * @expectedException streaky\sag\exception\couch
 	 * @expectedExceptionMessage Not_found (missing)
