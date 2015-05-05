@@ -182,7 +182,7 @@ class client {
 		$url = "/{$this->db}{$url}";
 
 		if($this->staleDefault) {
-			$url = self::setURLParameter($url, 'stale', 'ok');
+			$url = $this->setURLParameter($url, 'stale', 'ok');
 		}
 
 		//Deal with cached items
@@ -243,7 +243,7 @@ class client {
 		}
 
 		if($this->staleDefault) {
-			$url = self::setURLParameter($url, 'stale', 'ok');
+			$url = $this->setURLParameter($url, 'stale', 'ok');
 		}
 
 		//we're only asking for the HEAD so no caching is needed
@@ -455,13 +455,13 @@ class client {
 
 			if($createIfNotFound) {
 				try {
-					self::procPacket('HEAD', "/{$db}");
+					$this->procPacket('HEAD', "/{$db}");
 				} catch(exception\couch $e) {
 					if($e->getCode() != 404) {
 						throw $e; //these are not the errors that we are looking for
 					}
 
-					self::createDatabase($db);
+					$this->createDatabase($db);
 				}
 			}
 
