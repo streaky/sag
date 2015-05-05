@@ -92,6 +92,19 @@ class clientTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(201, $response->status);
 	}
 
+	public function testPostDoc() {
+		$doc = new \stdClass();
+		$doc->content = "servergenid";
+		$response = self::$sag->post($doc);
+
+		$this->assertEquals(201, $response->status);
+
+		$id = $response->body->id;
+		$response = self::$sag->get($id);
+		$this->assertEquals("1-", substr($response->body->_rev, 0, 2));
+		$this->assertEquals("servergenid", $response->body->content);
+	}
+
 	public function testFetchRealDoc() {
 		$response = self::$sag->get("foo");
 		$this->assertEquals(200, $response->status);
