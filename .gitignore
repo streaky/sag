@@ -1,6 +1,5 @@
 *.swp
 /docs
-/tests/coverage
 *.tar.gz
 *.tar.gz.sig
 *.tar.gz.md5
@@ -9,3 +8,4 @@
 /vendor
 .idea/
 composer.lock
+coverage/
