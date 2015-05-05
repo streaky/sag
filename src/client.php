@@ -24,16 +24,14 @@ namespace streaky\sag;
 class client {
 
 	/**
-	 * @var string Used by login() to use HTTP Basic Authentication.
-	 * @static
+	 * Use HTTP Basic Authentication
 	 */
-	public static $AUTH_BASIC = "AUTH_BASIC";
+	const AUTH_BASIC = "basic";
 
 	/**
-	 * @var string Used by login() to use HTTP Cookie Authentication.
-	 * @static
+	 * Use HTTP Cookie Authentication
 	 */
-	public static $AUTH_COOKIE = "AUTH_COOKIE";
+	const AUTH_COOKIE = "cookie";
 
 	private $db;                          //Database name to hit.
 
@@ -98,15 +96,12 @@ class client {
 	 * @see $AUTH_BASIC
 	 * @see $AUTH_COOKIE
 	 */
-	public function login($user, $pass, $type = null) {
-		if($type == null) {
-			$type = self::$AUTH_BASIC;
-		}
+	public function login($user, $pass, $type = self::AUTH_BASIC) {
 
 		$this->authType = $type;
 
 		switch($type) {
-			case self::$AUTH_BASIC:
+			case self::AUTH_BASIC:
 				//these will end up in a header, so don't URL encode them
 				$this->user = $user;
 				$this->pass = $pass;
@@ -114,7 +109,7 @@ class client {
 				return true;
 			break;
 
-			case self::$AUTH_COOKIE:
+			case self::AUTH_COOKIE:
 				$user = urlencode($user);
 				$pass = urlencode($pass);
 
@@ -134,7 +129,7 @@ class client {
 	/**
 	 * Get current session information on the server with /_session.
 	 *
-	 * @return stdClass
+	 * @return \stdClass
 	 */
 	public function getSession() {
 		return $this->procPacket('GET', '/_session');
@@ -146,7 +141,7 @@ class client {
 	 *
 	 * @param bool $decode True to decode, false to not decode.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 */
 	public function decode($decode) {
 		if(!is_bool($decode)) {
@@ -397,9 +392,9 @@ class client {
 	 * If you are using a SagCache and are copying to an existing destination,
 	 * then the result will be cached (ie., what's copied to the /$destID URL).
 	 *
-	 * @param string The _id of the document you're copying.
-	 * @param string The _id of the document you're copying to.
-	 * @param string The _rev of the document you're copying to. Defaults to
+	 * @param string $srcID The _id of the document you're copying.
+	 * @param string $dstID The _id of the document you're copying to.
+	 * @param string $dstRev The _rev of the document you're copying to. Defaults to
 	 * null.
 	 *
 	 * @return mixed
@@ -443,7 +438,7 @@ class client {
 	 * @param bool $createIfNotFound Whether to try and create the specified
 	 * database if it doesn't exist yet (checks every time this is called).
 	 *
-	 * @return Sag Returns $this. Throws on failure.
+	 * @return client Returns $this. Throws on failure.
 	 */
 	public function setDatabase($db, $createIfNotFound = false) {
 		if($this->db != $db || $createIfNotFound) {
@@ -765,7 +760,7 @@ class client {
 	 * @param int $seconds The seconds part of the timeout.
 	 * @param int $microseconds optional The microseconds part of the timeout.
 	 *
-	 * @return Sag Returns $this.
+	 * @return client Returns $this.
 	 */
 	public function setRWTimeout($seconds, $microseconds = 0) {
 		$this->httpAdapter->setRWTimeout($seconds, $microseconds);
@@ -1004,9 +999,9 @@ class client {
 		$headers['Accept'] = 'application/json';
 
 		//usernames and passwords can be blank
-		if($this->authType == self::$AUTH_BASIC && (isset($this->user) || isset($this->pass))) {
+		if($this->authType == self::AUTH_BASIC && (isset($this->user) || isset($this->pass))) {
 			$headers["Authorization"] = 'Basic ' . base64_encode("{$this->user}:{$this->pass}");
-		} elseif($this->authType == self::$AUTH_COOKIE && isset($this->authSession)) {
+		} elseif($this->authType == self::AUTH_COOKIE && isset($this->authSession)) {
 			$headers['Cookie'] = array('AuthSession' => $this->authSession);
 			$headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
 		}
