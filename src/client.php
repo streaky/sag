@@ -75,40 +75,7 @@ class client {
 	public function __construct($host = "127.0.0.1", $port = "5984") {
 		$this->host = $host;
 		$this->port = $port;
-
-		//sets to the default by ... default
-		$this->setHTTPAdapter();
-	}
-
-	/**
-	 * Set up curl HTTP library
-	 *
-	 * @return client Returns $this.
-	 */
-	private function setHTTPAdapter() {
-
-		// remember what was already set (ie., might have called decode() already)
-		$prevDecode = null;
-		$prevTimeouts = null;
-		if($this->httpAdapter) {
-			$prevDecode = $this->httpAdapter->decodeResp;
-			$prevTimeouts = $this->httpAdapter->getTimeouts();
-		}
-
-		// no other choice.
 		$this->httpAdapter = new curl($this->host, $this->port);
-
-		// restore previous decode value, if any
-		if(is_bool($prevDecode)) {
-			$this->httpAdapter->decodeResp = $prevDecode;
-		}
-
-		// restore previous timeout vlaues, if any
-		if(is_array($prevTimeouts)) {
-			$this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
-		}
-
-		return $this;
 	}
 
 	/**
