@@ -370,31 +370,20 @@ class client {
 	 *
 	 * @param mixed $data The document that you want created. Can be an object,
 	 * array, or string.
-	 * @param string $path Can be the path to a view or /all_docs. The database
-	 * will be prepended to the value.
 	 *
 	 * @return mixed
 	 */
-	public function post($data, $path = null) {
+	public function post($data) {
 		if(!$this->db) {
 			throw new exception\sag('No database specified');
 		}
-
 		if(!isset($data) || (!is_string($data) && !is_object($data) && !is_array($data))) {
 			throw new exception\sag('post() needs an object for data.');
 		}
-
 		if(!is_string($data)) {
 			$data = json_encode($data);
 		}
-
-		if(is_string($path) && !empty($path)) {
-			$path = ((substr($path, 0, 1) != '/') ? '/' : '') . $path;
-		} else if(isset($path)) {
-			throw new exception\sag('post() needs a string for a path.');
-		}
-
-		return $this->procPacket('POST', "/{$this->db}{$path}", $data);
+		return $this->procPacket('POST', "/{$this->db}", $data);
 	}
 
 	/**
