@@ -124,7 +124,18 @@ class clientTest extends \PHPUnit_Framework_TestCase {
 	 * @expectedExceptionMessage Conflict (Document update conflict)
 	 */
 	public function testUpdateConflict() {
-		$response = self::$sag->put("foo", self::$temp);
+		self::$sag->put("foo", self::$temp);
+	}
+
+	public function testDeleteDoc() {
+		$response = self::$sag->get("foo");
+		$response = self::$sag->delete("foo", $response->body->_rev);
+		$this->assertEquals(200, $response->status);
+	}
+
+	public function testDeleteDB() {
+		$response = self::$sag->deleteDatabase(self::$test_db);
+		$this->assertEquals(200, $response->status);
 	}
 }
 
