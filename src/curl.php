@@ -44,7 +44,7 @@ class curl {
 		  */
 		$this->followLocation = !ini_get('open_basedir');
 
-		$this->ch = curl_init();
+
 	}
 
 	/**
@@ -245,12 +245,26 @@ class curl {
 	 * @see makeResponse()
 	 */
 	public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
+
+		$this->ch = curl_init();
+
 		// the base cURL options
-		$opts = array(CURLOPT_URL => "{$this->proto}://{$this->host}:{$this->port}{$url}", CURLOPT_PORT => $this->port, CURLOPT_FOLLOWLOCATION => $this->followLocation, CURLOPT_HEADER => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_NOBODY => false, CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, CURLOPT_CUSTOMREQUEST => $method);
+		$opts = array(
+			CURLOPT_URL => "{$this->proto}://{$this->host}:{$this->port}{$url}",
+			CURLOPT_PORT => $this->port,
+			CURLOPT_FOLLOWLOCATION => $this->followLocation,
+			CURLOPT_HEADER => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_NOBODY => false,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => $method
+		);
+
+		$opts[CURLOPT_HTTPHEADER] = array();
+		$opts[CURLOPT_HTTPHEADER][] = "Connection: close";
 
 		// cURL wants the headers as an array of strings, not an assoc array
 		if(is_array($reqHeaders) && sizeof($reqHeaders) > 0) {
-			$opts[CURLOPT_HTTPHEADER] = array();
 
 			foreach($reqHeaders as $k => $v) {
 				$opts[CURLOPT_HTTPHEADER][] = "$k: $v";
@@ -331,21 +345,26 @@ class curl {
 				}
 			}
 		} else if(curl_errno($this->ch)) {
-			switch(curl_errno($this->ch)) {
+
+			$enum = curl_errno($this->ch);
+			$emes = curl_error($this->ch);
+			curl_close($this->ch);
+
+			switch($enum) {
 				case 7:
-					throw new exception\sag('cURL Error: Connection Refused', curl_errno($this->ch));
+					throw new exception\sag('cURL Error: Connection Refused', 7);
 				break;
 				default :
-					throw new exception\sag('cURL error #' . curl_errno($this->ch) . ': ' . curl_error($this->ch));
+					throw new exception\sag("cURL error: {$emes}", $enum);
 			}
 
 		} else {
+			curl_close($this->ch);
 			throw new exception\sag('cURL returned false without providing an error.');
 		}
 
 		// in the event cURL can't follow and we got a Location header w/ a 3xx
-		if(!$this->followLocation && isset($response->headers->location) && $response->status >= 300 && $response->status < 400
-		) {
+		if(!$this->followLocation && isset($response->headers->location) && $response->status >= 300 && $response->status < 400) {
 			$parts = parse_url($response->headers->location);
 
 			if(empty($parts['path'])) {
@@ -366,6 +385,7 @@ class curl {
 			return $adapter->procPacket($method, $parts['path'], $data, $reqHeaders);
 		}
 
+		curl_close($this->ch);
 		return self::makeResult($response, $method);
 	}
 
